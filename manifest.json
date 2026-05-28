@@ -1,0 +1,9 @@
+{
+  "name": "TOEIC 750 Grammar",
+  "short_name": "TOEIC文法",
+  "description": "TOEIC 750点対策 文法トレーニングアプリ",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f0f4f8",
+  "theme_color": "#2b6cb0"
+}
