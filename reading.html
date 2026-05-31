@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOEIC Reading — Part 7</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TOEIC Reading" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <link rel="stylesheet" href="reading.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- Header -->
+    <header class="r-header">
+      <div>
+        <a class="r-back-link" href="index.html">← Grammar</a>
+      </div>
+      <div style="margin-left:8px">
+        <h1 class="r-title">TOEIC Reading</h1>
+        <div class="r-subtitle">Part 7 · <span id="passage-progress">1 / 4</span> passages</div>
+      </div>
+      <div class="r-timer-box" id="timer-box">
+        <span class="r-timer-label">TIME</span>
+        <span class="r-timer-value" id="timer-display">00:00</span>
+      </div>
+      <div class="r-score-box">
+        <span class="r-score-label">SCORE</span>
+        <span class="r-score-value" id="score-display">— / —</span>
+      </div>
+    </header>
+
+    <!-- Result Banner -->
+    <div id="result-banner" class="r-result-banner hidden"></div>
+
+    <!-- Main Grid -->
+    <div class="r-main-grid">
+
+      <!-- Passage -->
+      <div class="r-passage-panel">
+        <div class="r-panel-label">Passage <span class="r-panel-line"></span></div>
+        <div class="r-passage-meta" id="passage-meta"></div>
+        <div class="r-passage-title" id="passage-title"></div>
+        <div class="r-passage-body" id="passage-body"></div>
+      </div>
+
+      <!-- Questions -->
+      <div>
+        <div class="r-panel-label">Questions <span class="r-panel-line"></span></div>
+        <div id="questions-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="r-footer">
+      <button class="r-btn r-btn-outline" onclick="nextPassage()">Next Passage</button>
+      <button class="r-btn r-btn-solid" id="submit-btn" onclick="submitAnswers()" disabled>Submit Answers</button>
+    </div>
+
+  </div>
+
+  <script src="reading-data.js"></script>
+  <script src="reading.js"></script>
+</body>
+</html>
