@@ -20,6 +20,7 @@
       <button class="r-nav-btn active" data-page="select" onclick="showPage('select')">問題選択</button>
       <button class="r-nav-btn" data-page="review" onclick="showPage('review')">弱点復習</button>
       <button class="r-nav-btn" data-page="progress" onclick="showPage('progress')">進捗</button>
+      <button class="r-nav-btn" data-page="generate" onclick="showPage('generate')">AI生成</button>
       <a class="r-nav-btn" href="index.html">文法 →</a>
     </div>
   </nav>
@@ -109,6 +110,64 @@
       <div style="margin-top:28px">
         <button class="r-btn r-btn-danger" onclick="resetProgress()">進捗をリセット</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== Page: AI生成 ===== -->
+  <div id="page-generate" class="r-page hidden">
+    <div class="r-container">
+      <div class="r-section-header">
+        <div class="r-page-title">AI 問題生成</div>
+        <div class="r-page-desc">Anthropic API · Part 7 パッセージを自動生成</div>
+      </div>
+
+      <!-- API Key -->
+      <div class="gen-card">
+        <label class="gen-label" for="gen-api-key">Anthropic API キー</label>
+        <input type="password" id="gen-api-key" class="gen-input" placeholder="sk-ant-..." />
+        <div class="gen-hint">キーはこのブラウザのローカルストレージにのみ保存されます</div>
+      </div>
+
+      <!-- Options -->
+      <div class="gen-card">
+        <div class="gen-options">
+          <div>
+            <label class="gen-label">文書タイプ</label>
+            <select id="gen-type" class="gen-select">
+              <option value="Memo">Memo（社内メモ）</option>
+              <option value="Business Email">Business Email（メール）</option>
+              <option value="Article">Article（記事）</option>
+              <option value="Form / Survey">Form（フォーム）</option>
+              <option value="Notice">Notice（お知らせ）</option>
+              <option value="Advertisement">Advertisement（広告）</option>
+            </select>
+          </div>
+          <div>
+            <label class="gen-label">難易度</label>
+            <select id="gen-difficulty" class="gen-select">
+              <option value="easy">Easy（基礎）</option>
+              <option value="medium" selected>Medium（標準）</option>
+              <option value="hard">Hard（上級）</option>
+            </select>
+          </div>
+          <div>
+            <label class="gen-label">問題数</label>
+            <select id="gen-qcount" class="gen-select">
+              <option value="2">2問</option>
+              <option value="3" selected>3問</option>
+              <option value="4">4問</option>
+            </select>
+          </div>
+        </div>
+        <button id="gen-btn" class="r-btn r-btn-solid" onclick="generatePassage()">AI でパッセージを生成する</button>
+        <div id="gen-status" class="gen-status"></div>
+      </div>
+
+      <!-- Generated list -->
+      <div class="r-section-header" style="margin-top:8px">
+        <div class="r-page-title" style="font-size:1.1rem">生成済みパッセージ</div>
+      </div>
+      <div id="generated-list"></div>
     </div>
   </div>
 

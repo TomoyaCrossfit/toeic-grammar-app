@@ -393,6 +393,102 @@ body {
 /* ===== Misc ===== */
 .empty-msg { text-align: center; padding: 40px 16px; color: #7a7060; font-size: 0.78rem; line-height: 1.9; }
 
+/* ===== Generate Page ===== */
+.gen-card {
+  border: 1px solid #c8b89a;
+  background: rgba(255,255,255,0.55);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.gen-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #7a7060;
+  margin-bottom: 8px;
+}
+.gen-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #c8b89a;
+  background: rgba(255,255,255,0.85);
+  color: #1a1a2e;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.74rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.gen-input:focus { border-color: #1a1a2e; }
+.gen-hint { font-size: 0.62rem; color: #aaa098; margin-top: 6px; }
+.gen-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.gen-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #c8b89a;
+  background: rgba(255,255,255,0.85);
+  color: #1a1a2e;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  outline: none;
+  cursor: pointer;
+}
+.gen-select:focus { border-color: #1a1a2e; }
+.gen-status {
+  margin-top: 12px;
+  font-size: 0.72rem;
+  min-height: 20px;
+  letter-spacing: 0.3px;
+  line-height: 1.6;
+}
+.gen-status.generating { color: #1a1a2e; }
+.gen-status.success { color: #2d6a4f; }
+.gen-status.error { color: #c9402b; }
+.gen-item {
+  border: 1px solid #c8b89a;
+  background: rgba(255,255,255,0.55);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.gen-item-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+.gen-item-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.88rem;
+  color: #1a1a2e;
+}
+.gen-item-meta { font-size: 0.65rem; color: #7a7060; }
+.gen-delete-btn {
+  background: #fce8e6;
+  border: 1px solid #c9402b;
+  color: #c9402b;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.gen-delete-btn:hover { background: #f9d0cc; }
+.gen-ai-badge {
+  font-size: 0.6rem;
+  padding: 2px 7px;
+  letter-spacing: 1px;
+  background: #e8ecf8;
+  color: #1a1a2e;
+  border: 1px solid #8892c8;
+  color: #4a52a0;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 620px) {
   .r-main-grid { grid-template-columns: 1fr; }
