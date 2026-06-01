@@ -12,55 +12,104 @@
   <link rel="stylesheet" href="reading.css" />
 </head>
 <body>
-  <div id="app">
 
-    <!-- Header -->
-    <header class="r-header">
-      <div>
-        <a class="r-back-link" href="index.html">← Grammar</a>
-      </div>
-      <div style="margin-left:8px">
-        <h1 class="r-title">TOEIC Reading</h1>
-        <div class="r-subtitle">Part 7 · <span id="passage-progress">1 / 4</span> passages</div>
-      </div>
-      <div class="r-timer-box" id="timer-box">
-        <span class="r-timer-label">TIME</span>
-        <span class="r-timer-value" id="timer-display">00:00</span>
-      </div>
-      <div class="r-score-box">
-        <span class="r-score-label">SCORE</span>
-        <span class="r-score-value" id="score-display">— / —</span>
-      </div>
-    </header>
+  <!-- ===== Nav ===== -->
+  <nav class="r-nav">
+    <div class="r-nav-brand">TOEIC Reading · Part 7</div>
+    <div class="r-nav-links">
+      <button class="r-nav-btn active" data-page="select" onclick="showPage('select')">問題選択</button>
+      <button class="r-nav-btn" data-page="review" onclick="showPage('review')">弱点復習</button>
+      <button class="r-nav-btn" data-page="progress" onclick="showPage('progress')">進捗</button>
+      <a class="r-nav-btn" href="index.html">文法 →</a>
+    </div>
+  </nav>
 
-    <!-- Result Banner -->
-    <div id="result-banner" class="r-result-banner hidden"></div>
+  <!-- ===== Page: 問題選択 ===== -->
+  <div id="page-select" class="r-page">
+    <div class="r-container">
+      <div class="r-section-header">
+        <div class="r-page-title">Passage を選んで始める</div>
+        <div class="r-page-desc">全 4 パッセージ · Part 7 形式</div>
+      </div>
+      <div class="passage-card-grid" id="passage-card-grid"></div>
+    </div>
+  </div>
 
-    <!-- Main Grid -->
-    <div class="r-main-grid">
+  <!-- ===== Page: Reading ===== -->
+  <div id="page-reading" class="r-page hidden">
+    <div class="r-container">
 
-      <!-- Passage -->
-      <div class="r-passage-panel">
-        <div class="r-panel-label">Passage <span class="r-panel-line"></span></div>
-        <div class="r-passage-meta" id="passage-meta"></div>
-        <div class="r-passage-title" id="passage-title"></div>
-        <div class="r-passage-body" id="passage-body"></div>
+      <!-- Reading header -->
+      <div class="r-reading-header">
+        <button class="r-btn r-btn-outline" onclick="showPage('select')">← 戻る</button>
+        <div style="flex:1; min-width:0">
+          <div class="r-reading-title" id="reading-title-display"></div>
+          <div class="r-page-desc" id="reading-meta-display"></div>
+        </div>
+        <div class="r-timer-box" id="timer-box">
+          <span class="r-timer-label">TIME</span>
+          <span class="r-timer-value" id="timer-display">00:00</span>
+        </div>
+        <div class="r-score-box">
+          <span class="r-score-label">SCORE</span>
+          <span class="r-score-value" id="score-display">— / —</span>
+        </div>
       </div>
 
-      <!-- Questions -->
-      <div>
-        <div class="r-panel-label">Questions <span class="r-panel-line"></span></div>
-        <div id="questions-list"></div>
+      <!-- Result Banner -->
+      <div id="result-banner" class="r-result-banner hidden"></div>
+
+      <!-- 2-column grid -->
+      <div class="r-main-grid">
+        <div class="r-passage-panel">
+          <div class="r-panel-label">Passage <span class="r-panel-line"></span></div>
+          <div class="r-passage-meta" id="passage-meta"></div>
+          <div class="r-passage-title" id="passage-title"></div>
+          <div class="r-passage-body" id="passage-body"></div>
+        </div>
+        <div>
+          <div class="r-panel-label">Questions <span class="r-panel-line"></span></div>
+          <div id="questions-list"></div>
+        </div>
+      </div>
+
+      <!-- Footer actions -->
+      <div class="r-footer">
+        <button class="r-btn r-btn-outline" onclick="showPage('select')">← 問題選択に戻る</button>
+        <button class="r-btn r-btn-outline hidden" id="retry-btn" onclick="retryPassage()">もう一度解く</button>
+        <button class="r-btn r-btn-solid" id="submit-btn" onclick="submitAnswers()" disabled>Submit Answers</button>
       </div>
 
     </div>
+  </div>
 
-    <!-- Footer -->
-    <div class="r-footer">
-      <button class="r-btn r-btn-outline" onclick="nextPassage()">Next Passage</button>
-      <button class="r-btn r-btn-solid" id="submit-btn" onclick="submitAnswers()" disabled>Submit Answers</button>
+  <!-- ===== Page: 弱点復習 ===== -->
+  <div id="page-review" class="r-page hidden">
+    <div class="r-container">
+      <div class="r-section-header">
+        <div class="r-page-title">弱点復習</div>
+        <div class="r-page-desc">最後の挑戦で間違えた問題 · 再挑戦して正確さを上げよう</div>
+      </div>
+      <div id="review-list"></div>
     </div>
+  </div>
 
+  <!-- ===== Page: 進捗 ===== -->
+  <div id="page-progress" class="r-page hidden">
+    <div class="r-container">
+      <div class="r-section-header">
+        <div class="r-page-title">学習進捗</div>
+        <div class="r-page-desc">PART 7 READING PROGRESS</div>
+      </div>
+      <div class="prog-overview" id="prog-overview"></div>
+      <div class="r-section-header" style="margin-top:8px">
+        <div class="r-page-title" style="font-size:1.1rem">パッセージ別成績</div>
+      </div>
+      <div id="prog-rows"></div>
+      <div style="margin-top:28px">
+        <button class="r-btn r-btn-danger" onclick="resetProgress()">進捗をリセット</button>
+      </div>
+    </div>
   </div>
 
   <script src="reading-data.js"></script>
