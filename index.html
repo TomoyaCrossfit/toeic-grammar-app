@@ -3,192 +3,323 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TOEIC文法トレーニング（750点対策）</title>
+  <title>TOEIC Trainer — Part 5 / 6 / 7</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="TOEIC文法" />
-  <meta name="theme-color" content="#2b6cb0" />
-  <link rel="stylesheet" href="style.css" />
+  <meta name="apple-mobile-web-app-title" content="TOEIC Trainer" />
+  <meta name="theme-color" content="#0d1117" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* ── Home-specific styles ── */
+    .home-hero {
+      padding: 40px 16px 28px;
+      text-align: center;
+    }
+    .home-logo {
+      font-size: 11px;
+      font-family: monospace;
+      letter-spacing: 3px;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .home-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .home-sub {
+      font-size: 14px;
+      color: var(--text3);
+      margin-top: 8px;
+    }
+
+    /* ── Part cards ── */
+    .part-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 16px 32px;
+    }
+    @media (max-width: 640px) {
+      .part-grid { grid-template-columns: 1fr; }
+    }
+
+    .part-card {
+      background: var(--surf);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      padding: 24px 20px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.15s, transform 0.1s;
+      cursor: pointer;
+    }
+    .part-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .part-card.p5:hover { border-color: var(--accent); }
+    .part-card.p6:hover { border-color: var(--purple); }
+    .part-card.p7:hover { border-color: var(--green); }
+
+    .pc-num {
+      font-size: 11px;
+      font-family: monospace;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    .p5 .pc-num { color: var(--accent); }
+    .p6 .pc-num { color: var(--purple); }
+    .p7 .pc-num { color: var(--green); }
+
+    .pc-icon { font-size: 32px; margin: 4px 0; }
+    .pc-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+    .pc-en {
+      font-size: 11px;
+      color: var(--text3);
+      font-family: monospace;
+    }
+    .pc-desc {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6;
+      flex: 1;
+    }
+    .pc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .pc-tag {
+      font-size: 11px;
+      font-family: monospace;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 7px;
+      color: var(--text3);
+    }
+    .pc-btn {
+      display: block;
+      text-align: center;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text2);
+      text-decoration: none;
+      transition: all 0.15s;
+      margin-top: 6px;
+    }
+    .part-card:hover .pc-btn { color: var(--text); border-color: var(--text3); }
+    .p5 .pc-btn:hover { background: rgba(59,130,246,0.1); border-color: var(--accent); color: var(--accent); }
+    .p6 .pc-btn:hover { background: rgba(188,140,255,0.1); border-color: var(--purple); color: var(--purple); }
+    .p7 .pc-btn:hover { background: rgba(63,185,80,0.1); border-color: var(--green); color: var(--green); }
+
+    /* ── Progress summary ── */
+    .home-prog {
+      max-width: 900px;
+      margin: 0 auto 32px;
+      padding: 0 16px;
+    }
+    .home-prog-title {
+      font-size: 11px;
+      font-family: monospace;
+      letter-spacing: 2px;
+      color: var(--text3);
+      margin-bottom: 12px;
+    }
+    .home-prog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 640px) { .home-prog-grid { grid-template-columns: 1fr; } }
+
+    .hp-card {
+      background: var(--surf);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .hp-label {
+      font-size: 10px;
+      font-family: monospace;
+      letter-spacing: 1px;
+      color: var(--text3);
+      margin-bottom: 4px;
+    }
+    .hp-val {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: monospace;
+      color: var(--text);
+    }
+    .hp-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    .home-tip {
+      max-width: 900px;
+      margin: 0 auto 40px;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text3);
+      line-height: 1.7;
+      border-top: 1px solid var(--border2);
+      padding-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <div id="app">
-    <!-- ナビゲーション -->
-    <nav class="nav">
-      <div class="nav-brand">TOEIC 750 Grammar</div>
-      <div class="nav-links">
-        <button class="nav-btn active" data-page="practice" onclick="showPage('practice')">問題演習</button>
-        <button class="nav-btn" data-page="review" onclick="showPage('review')">弱点復習</button>
-        <button class="nav-btn" data-page="progress" onclick="showPage('progress')">進捗</button>
-        <button class="nav-btn" data-page="generate" onclick="showPage('generate')">AI生成</button>
-        <a class="nav-btn" href="reading.html">Reading →</a>
-      </div>
-    </nav>
 
-    <!-- 問題演習ページ -->
-    <div id="page-practice" class="page active">
-      <div class="container">
-        <!-- カテゴリ選択 -->
-        <div id="category-select-area" class="card">
-          <h2 class="section-title">カテゴリを選択</h2>
-          <div id="category-grid" class="category-grid"></div>
-          <div class="mt-20">
-            <button class="btn btn-primary btn-lg" onclick="startPractice('all')">全カテゴリで練習</button>
-          </div>
-        </div>
+<!-- Nav -->
+<nav class="t-nav">
+  <div class="t-nav-brand">TOEIC Trainer</div>
+  <div class="t-nav-links">
+    <a class="t-nav-btn" href="part5.html">Part 5</a>
+    <a class="t-nav-btn" href="part6.html">Part 6</a>
+    <a class="t-nav-btn" href="reading.html">Part 7</a>
+  </div>
+</nav>
 
-        <!-- 問題表示エリア -->
-        <div id="question-area" class="hidden">
-          <div class="question-header">
-            <span id="question-counter" class="question-counter"></span>
-            <div class="timer-container">
-              <span id="question-timer" class="timer-display">0:45</span>
-              <span class="timer-label">残り時間</span>
-            </div>
-            <span id="question-category-badge" class="badge"></span>
-          </div>
-          <div class="card">
-            <p id="question-text" class="question-text"></p>
-            <div id="choices" class="choices"></div>
-          </div>
-          <div id="explanation-area" class="hidden">
-            <div id="result-banner" class="result-banner"></div>
-            <div id="time-taken-display" class="time-taken-display"></div>
-            <div class="card explanation-card">
-              <div id="translation-box" class="translation-box"></div>
-              <h3 class="explanation-title">解説</h3>
-              <p id="explanation-text" class="explanation-text"></p>
-              <div id="grammar-point" class="grammar-point"></div>
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-secondary" onclick="endSession()">終了</button>
-              <button class="btn btn-primary" onclick="nextQuestion()">次の問題 →</button>
-            </div>
-          </div>
-        </div>
+<!-- Hero -->
+<div class="home-hero">
+  <div class="home-logo">TOEIC 750 TRAINER</div>
+  <div class="home-title">どのパートを練習しますか？</div>
+  <div class="home-sub">Part 5 · 6 · 7 すべてに対応。AIで問題も追加できます。</div>
+</div>
 
-        <!-- セッション結果 -->
-        <div id="session-result" class="hidden">
-          <div class="card result-card">
-            <h2 class="result-title">セッション結果</h2>
-            <div class="result-score-area">
-              <div class="result-score" id="result-score-display"></div>
-              <div class="result-label">正解率</div>
-            </div>
-            <div id="result-stats" class="result-stats"></div>
-            <div class="btn-row">
-              <button class="btn btn-secondary" onclick="showCategorySelect()">カテゴリ選択へ</button>
-              <button class="btn btn-primary" onclick="startPractice(currentCategory)">もう一度</button>
-            </div>
-          </div>
-        </div>
-      </div>
+<!-- Part cards -->
+<div class="part-grid">
+
+  <!-- Part 5 -->
+  <a class="part-card p5" href="part5.html">
+    <div class="pc-num">PART 5</div>
+    <div class="pc-icon">📝</div>
+    <div class="pc-title">文法穴埋め</div>
+    <div class="pc-en">Short Sentence Fill-in</div>
+    <div class="pc-desc">1文の英文に空欄があり、4択から文法的に正しい語句を選ぶ問題。時制・品詞・前置詞など文法力を鍛えます。</div>
+    <div class="pc-meta">
+      <span class="pc-tag">45秒/問</span>
+      <span class="pc-tag">カテゴリ別演習</span>
+      <span class="pc-tag">AI生成対応</span>
     </div>
+    <div class="pc-btn">Part 5 を始める →</div>
+  </a>
 
-    <!-- 弱点復習ページ -->
-    <div id="page-review" class="page hidden">
-      <div class="container">
-        <div class="card">
-          <h2 class="section-title">弱点復習</h2>
-          <p class="section-desc">間違えた問題・苦手な問題をもう一度解きましょう</p>
-          <div id="review-list"></div>
-          <div id="review-empty" class="empty-msg hidden">
-            間違えた問題がまだありません。問題演習から始めましょう！
-          </div>
-        </div>
-        <div id="review-question-area" class="hidden">
-          <div class="question-header">
-            <span id="review-counter" class="question-counter"></span>
-            <div class="timer-container">
-              <span id="review-timer" class="timer-display">0:45</span>
-              <span class="timer-label">残り時間</span>
-            </div>
-            <span id="review-category-badge" class="badge"></span>
-          </div>
-          <div class="card">
-            <p id="review-question-text" class="question-text"></p>
-            <div id="review-choices" class="choices"></div>
-          </div>
-          <div id="review-explanation-area" class="hidden">
-            <div id="review-result-banner" class="result-banner"></div>
-            <div id="review-time-taken-display" class="time-taken-display"></div>
-            <div class="card explanation-card">
-              <div id="review-translation-box" class="translation-box"></div>
-              <h3 class="explanation-title">解説</h3>
-              <p id="review-explanation-text" class="explanation-text"></p>
-              <div id="review-grammar-point" class="grammar-point"></div>
-            </div>
-            <div class="btn-row">
-              <button class="btn btn-secondary" onclick="endReview()">復習リストへ</button>
-              <button class="btn btn-primary" onclick="nextReviewQuestion()">次の問題 →</button>
-            </div>
-          </div>
-        </div>
-      </div>
+  <!-- Part 6 -->
+  <a class="part-card p6" href="part6.html">
+    <div class="pc-num">PART 6</div>
+    <div class="pc-icon">📄</div>
+    <div class="pc-title">文章完成</div>
+    <div class="pc-en">Passage Completion</div>
+    <div class="pc-desc">メール・メモなどの文章に4つの空欄があり、文脈を読みながら適切な語句・文を選ぶ問題。文挿入にも対応。</div>
+    <div class="pc-meta">
+      <span class="pc-tag">4空欄/文章</span>
+      <span class="pc-tag">文挿入あり</span>
+      <span class="pc-tag">AI生成対応</span>
     </div>
+    <div class="pc-btn">Part 6 を始める →</div>
+  </a>
 
-    <!-- 進捗ページ -->
-    <div id="page-progress" class="page hidden">
-      <div class="container">
-        <div class="card">
-          <h2 class="section-title">学習進捗</h2>
-          <div class="stats-overview" id="stats-overview"></div>
-        </div>
-        <div class="card">
-          <h3 class="section-title">カテゴリ別成績</h3>
-          <div id="category-stats"></div>
-        </div>
-        <div class="card">
-          <h3 class="section-title">最近の学習履歴</h3>
-          <div id="history-list"></div>
-        </div>
-        <div class="mt-20">
-          <button class="btn btn-danger" onclick="resetProgress()">進捗をリセット</button>
-        </div>
-      </div>
+  <!-- Part 7 -->
+  <a class="part-card p7" href="reading.html">
+    <div class="pc-num">PART 7</div>
+    <div class="pc-icon">📖</div>
+    <div class="pc-title">長文読解</div>
+    <div class="pc-en">Reading Comprehension</div>
+    <div class="pc-desc">メモ・記事・メールなどの長文を読んで質問に答える問題。内容把握・推測・細部の読み取りを練習します。</div>
+    <div class="pc-meta">
+      <span class="pc-tag">3〜4問/パッセージ</span>
+      <span class="pc-tag">タイム計測</span>
+      <span class="pc-tag">AI生成対応</span>
+    </div>
+    <div class="pc-btn">Part 7 を始める →</div>
+  </a>
+
+</div>
+
+<!-- Progress summary -->
+<div class="home-prog">
+  <div class="home-prog-title">PROGRESS OVERVIEW</div>
+  <div class="home-prog-grid" id="home-prog-grid">
+    <div class="hp-card">
+      <div class="hp-label">PART 5 · 正解率</div>
+      <div class="hp-val" id="hp-p5-rate">—</div>
+      <div class="hp-sub" id="hp-p5-count">まだ解いていません</div>
+    </div>
+    <div class="hp-card">
+      <div class="hp-label">PART 6 · 正解率</div>
+      <div class="hp-val" id="hp-p6-rate">—</div>
+      <div class="hp-sub" id="hp-p6-count">まだ解いていません</div>
+    </div>
+    <div class="hp-card">
+      <div class="hp-label">PART 7 · 正解率</div>
+      <div class="hp-val" id="hp-p7-rate">—</div>
+      <div class="hp-sub" id="hp-p7-count">まだ解いていません</div>
     </div>
   </div>
+</div>
 
-    <!-- AI生成ページ -->
-    <div id="page-generate" class="page hidden">
-      <div class="container">
-        <div class="card">
-          <h2 class="section-title">AI問題生成</h2>
-          <p class="section-desc">Anthropic APIで新しいTOEIC Part 5問題を自動生成します</p>
+<!-- Tips -->
+<div class="home-tip">
+  <strong style="color:var(--text2)">学習のヒント</strong><br>
+  Part 5 は1問45秒を目標に文法の瞬発力を鍛えましょう。Part 6 は文脈全体を読んで文挿入問題に慣れることが大切です。Part 7 は先に設問を読んでからパッセージに進むと効率的です。
+  各パートの「AI生成」機能を使えば、自分のレベルに合った新問題を無限に追加できます。
+</div>
 
-          <div class="api-key-area">
-            <label class="form-label">Anthropic APIキー</label>
-            <input type="password" id="api-key-input" class="form-input" placeholder="sk-ant-..." />
-            <p class="form-hint">キーはこのブラウザのローカルストレージにのみ保存されます</p>
-          </div>
+<script>
+function loadHomeProgress() {
+  // Part 5
+  try {
+    const p5 = JSON.parse(localStorage.getItem('toeic_progress') || '{}');
+    if (p5.totalAnswered > 0) {
+      const rate = Math.round(p5.totalCorrect / p5.totalAnswered * 100);
+      document.getElementById('hp-p5-rate').textContent = rate + '%';
+      document.getElementById('hp-p5-count').textContent = p5.totalAnswered + '問回答済み';
+    }
+  } catch {}
 
-          <div class="gen-options">
-            <div class="form-group">
-              <label class="form-label">カテゴリ</label>
-              <select id="gen-category" class="form-select"></select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">生成数</label>
-              <select id="gen-count" class="form-select">
-                <option value="1">1問</option>
-                <option value="3" selected>3問</option>
-                <option value="5">5問</option>
-              </select>
-            </div>
-          </div>
+  // Part 6
+  try {
+    const p6 = JSON.parse(localStorage.getItem('toeic_p6_progress') || '{}');
+    const attempts = Object.values(p6);
+    if (attempts.length > 0) {
+      const totalC = attempts.reduce((s, a) => s + (a.lastScore || 0), 0);
+      const totalQ = attempts.reduce((s, a) => s + (a.totalQ || 4), 0);
+      if (totalQ > 0) {
+        const rate = Math.round(totalC / totalQ * 100);
+        document.getElementById('hp-p6-rate').textContent = rate + '%';
+        document.getElementById('hp-p6-count').textContent = attempts.length + ' パッセージ回答済み';
+      }
+    }
+  } catch {}
 
-          <button id="generate-btn" class="btn btn-primary btn-lg" onclick="generateQuestions()">AIで問題を生成</button>
-          <div id="gen-status" class="gen-status"></div>
-        </div>
+  // Part 7
+  try {
+    const p7 = JSON.parse(localStorage.getItem('toeic_reading_progress') || '{}');
+    const attempts7 = Object.values(p7);
+    if (attempts7.length > 0) {
+      document.getElementById('hp-p7-rate').textContent = attempts7.length + '件';
+      document.getElementById('hp-p7-count').textContent = 'パッセージ完了済み';
+    }
+  } catch {}
+}
 
-        <div class="card">
-          <h3 class="section-title">生成済み問題</h3>
-          <div id="generated-list"></div>
-        </div>
-      </div>
-    </div>
-
-  <script src="questions.js"></script>
-  <script src="app.js"></script>
+loadHomeProgress();
+</script>
 </body>
 </html>

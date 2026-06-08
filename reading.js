@@ -1,4 +1,4 @@
-const DIFF_COLORS = { easy: "#2d6a4f", medium: "#b07d2a", hard: "#c9402b" };
+const DIFF_COLORS = { easy: "#3fb950", medium: "#e3b341", hard: "#f85149" };
 const PROGRESS_KEY = "toeic_reading_progress";
 const EXTRA_PASSAGES_KEY = "toeic_reading_extra_passages";
 
@@ -89,9 +89,9 @@ function updateTimerDisplay() {
   const t = submitted ? finalTime : elapsed;
   el.textContent = formatTime(t);
   el.className = "r-timer-value";
-  if (t >= 180) { el.classList.add("danger"); box.style.borderColor = "#c9402b"; }
-  else if (t >= 120) { el.classList.add("warning"); box.style.borderColor = "#b07d2a"; }
-  else { box.style.borderColor = "#2d6a4f"; }
+  if (t >= 180) { el.classList.add("danger"); box.style.borderColor = "rgba(248,81,73,0.5)"; }
+  else if (t >= 120) { el.classList.add("warning"); box.style.borderColor = "rgba(227,179,65,0.4)"; }
+  else { box.style.borderColor = "rgba(63,185,80,0.3)"; }
 }
 
 // ===== Page routing =====
@@ -126,7 +126,7 @@ function startPassage(index) {
   document.getElementById("submit-btn").disabled = true;
   document.getElementById("retry-btn").classList.add("hidden");
   document.getElementById("score-display").textContent = "— / —";
-  document.getElementById("timer-box").style.borderColor = "#2d6a4f";
+  document.getElementById("timer-box").style.borderColor = "rgba(63,185,80,0.3)";
 
   renderPassage();
   renderQuestions();
@@ -147,10 +147,10 @@ function renderSelectPage() {
     const bestScore = stat && stat.bestScore >= 0 ? stat.bestScore : null;
     const totalQ = p.questions.length;
     const rateText = bestScore !== null ? `${bestScore} / ${totalQ}` : "未挑戦";
-    const rateColor = bestScore === null ? "#888"
-      : bestScore === totalQ ? "#2d6a4f"
-      : bestScore >= totalQ / 2 ? "#b07d2a"
-      : "#c9402b";
+    const rateColor = bestScore === null ? "#656d76"
+      : bestScore === totalQ ? "#3fb950"
+      : bestScore >= totalQ / 2 ? "#e3b341"
+      : "#f85149";
     const diffColor = DIFF_COLORS[p.difficulty];
     const hasWeak = stat && stat.wrongQIds && stat.wrongQIds.length > 0;
     const barPct = bestScore !== null ? Math.round(bestScore / totalQ * 100) : 0;
@@ -231,7 +231,7 @@ function renderResultBanner() {
   const p = PASSAGES[currentPassageIndex];
   const correct = p.questions.filter(q => answers[q.id] === q.answer).length;
   const t = finalTime;
-  const color = t < 120 ? "#2d6a4f" : t < 180 ? "#b07d2a" : "#c9402b";
+  const color = t < 120 ? "#3fb950" : t < 180 ? "#e3b341" : "#f85149";
   const emoji = t < 120 ? "🏃 速い！" : t < 180 ? "👍 良いペース" : "📖 じっくり読んだね";
   const banner = document.getElementById("result-banner");
   banner.innerHTML = `
@@ -321,7 +321,7 @@ function renderProgressPage() {
         <div class="prog-info" style="color:#aaa">未挑戦</div>
       </div>`;
     const rate = stat.bestScore / p.questions.length;
-    const barColor = rate >= 0.8 ? "#2d6a4f" : rate >= 0.5 ? "#b07d2a" : "#c9402b";
+    const barColor = rate >= 0.8 ? "#3fb950" : rate >= 0.5 ? "#e3b341" : "#f85149";
     const bestTimeStr = stat.bestTime !== null ? formatTime(stat.bestTime) : "—";
     return `
       <div class="prog-row">

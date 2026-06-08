@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOEIC Part 6 — 文章完成</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TOEIC Part 6" />
+  <meta name="theme-color" content="#0d1117" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    /* ── Part 6 specific styles ── */
+    .p6-page { min-height: calc(100vh - 54px); }
+
+    /* ── Select page ── */
+    .p6-select-container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+    .p6-page-header { border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; }
+    .p6-page-title  { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .p6-page-desc   { font-size: 12px; color: var(--text3); font-family: monospace; letter-spacing: 0.5px; }
+
+    .p6-passage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .p6-passage-card {
+      background: var(--surf);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    .p6-passage-card:hover { border-color: var(--purple); }
+    .p6-passage-card.done  { border-color: rgba(188,140,255,0.3); }
+    .p6-card-meta  { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .p6-card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .p6-card-intro { font-size: 11px; color: var(--text3); font-family: monospace; line-height: 1.5; }
+    .p6-card-stats { display: flex; gap: 12px; font-size: 11px; color: var(--text3); font-family: monospace; }
+    .p6-card-btn {
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text3);
+      transition: color 0.15s;
+    }
+    .p6-passage-card:hover .p6-card-btn { color: var(--purple); }
+    .p6-type-badge {
+      font-size: 10px;
+      font-family: monospace;
+      background: rgba(240,136,62,0.12);
+      color: var(--orange);
+      border: 1px solid rgba(240,136,62,0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .p6-ai-badge {
+      font-size: 10px;
+      font-family: monospace;
+      background: rgba(188,140,255,0.1);
+      color: var(--purple);
+      border: 1px solid rgba(188,140,255,0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .p6-done-badge {
+      font-size: 10px;
+      font-family: monospace;
+      background: rgba(63,185,80,0.1);
+      color: var(--green);
+      border: 1px solid rgba(63,185,80,0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .p6-sentence-tag {
+      font-size: 9px;
+      font-family: monospace;
+      background: rgba(188,140,255,0.1);
+      color: var(--purple);
+      border: 1px solid rgba(188,140,255,0.25);
+      border-radius: 3px;
+      padding: 1px 5px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    /* ── Reading page ── */
+    .p6-reading-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border2);
+      flex-wrap: wrap;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .p6-reading-title { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; min-width: 0; }
+    .p6-score-box { display: flex; align-items: center; gap: 6px; background: var(--surf2); border-radius: 6px; padding: 5px 12px; }
+    .p6-score-label { font-size: 10px; letter-spacing: 1px; color: var(--text3); font-family: monospace; }
+    .p6-score-value { font-size: 16px; font-weight: 700; color: var(--text); font-family: monospace; }
+
+    .p6-main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      max-width: 1100px;
+      margin: 0 auto;
+      min-height: calc(100vh - 120px);
+    }
+    @media (max-width: 720px) { .p6-main-grid { grid-template-columns: 1fr; } }
+
+    .p6-passage-panel {
+      padding: 20px 20px 32px;
+      border-right: 1px solid var(--border2);
+    }
+    @media (max-width: 720px) { .p6-passage-panel { border-right: none; border-bottom: 1px solid var(--border2); } }
+
+    .p6-questions-panel { padding: 20px 20px 32px; overflow-y: auto; }
+
+    .p6-panel-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: monospace;
+    }
+    .p6-panel-line { flex: 1; height: 1px; background: var(--border); display: block; }
+
+    /* Passage text */
+    .p6-passage-intro { font-size: 11px; color: var(--text3); font-family: monospace; letter-spacing: 0.5px; margin-bottom: 14px; }
+    .p6-passage-line  { font-size: 14px; line-height: 1.9; color: var(--text2); }
+    .p6-gap           { height: 0.7em; }
+
+    /* Inline blanks */
+    .p6-blank {
+      display: inline-block;
+      background: rgba(188,140,255,0.12);
+      border: 1px dashed rgba(188,140,255,0.4);
+      border-radius: 4px;
+      padding: 1px 8px;
+      color: var(--purple);
+      font-family: monospace;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .p6-blank:hover { background: rgba(188,140,255,0.2); }
+    .p6-blank-filled {
+      display: inline-block;
+      border-radius: 4px;
+      padding: 1px 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.1s;
+      font-size: 13px;
+    }
+    .p6-blank-filled.pending { background: rgba(227,179,65,0.12); color: var(--yellow); border: 1px solid rgba(227,179,65,0.3); }
+    .p6-blank-filled.correct { background: rgba(63,185,80,0.15);  color: var(--green);  border: 1px solid rgba(63,185,80,0.35); }
+    .p6-blank-filled.wrong   { background: rgba(248,81,73,0.12);  color: var(--red);    border: 1px solid rgba(248,81,73,0.3);  }
+
+    /* Questions */
+    .p6-q-block {
+      background: var(--surf);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+    .p6-q-block.answered  { border-color: rgba(227,179,65,0.4); }
+    .p6-q-block.correct   { border-color: rgba(63,185,80,0.4);  border-left: 4px solid var(--green); }
+    .p6-q-block.incorrect { border-color: rgba(248,81,73,0.35); border-left: 4px solid var(--red);   }
+    .p6-q-num {
+      font-size: 10px;
+      font-family: monospace;
+      letter-spacing: 1px;
+      color: var(--text3);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .p6-choices { display: flex; flex-direction: column; gap: 6px; }
+    .p6-choice {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 9px 12px;
+      background: var(--surf2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      color: var(--text2);
+      width: 100%;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+    .p6-choice:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+    .p6-choice:disabled { cursor: default; }
+    .p6-choice.selected   { border-color: var(--yellow); background: rgba(227,179,65,0.07); color: var(--text); }
+    .p6-choice.correct-ans{ border-color: var(--green);  background: rgba(63,185,80,0.1);   color: var(--green); }
+    .p6-choice.wrong-ans  { border-color: var(--red);    background: rgba(248,81,73,0.08);   color: var(--red); }
+    .p6-choice-key { font-weight: 700; min-width: 16px; color: var(--text3); font-family: monospace; flex-shrink: 0; }
+    .p6-explanation {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: var(--surf2);
+      border-left: 3px solid var(--yellow);
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+      line-height: 1.75;
+      color: var(--text2);
+    }
+    .p6-exp-gp {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--purple);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    /* Result banner */
+    .p6-result-banner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 12px 16px;
+      max-width: calc(1100px - 32px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .p6-result-banner.success { background: rgba(63,185,80,0.1);  border: 1px solid rgba(63,185,80,0.3); }
+    .p6-result-banner.good    { background: rgba(63,185,80,0.07); border: 1px solid rgba(63,185,80,0.2); }
+    .p6-result-banner.ok      { background: rgba(227,179,65,0.08); border: 1px solid rgba(227,179,65,0.25); }
+    .p6-result-banner.bad     { background: rgba(248,81,73,0.07); border: 1px solid rgba(248,81,73,0.2); }
+    .p6-result-score { font-size: 24px; font-weight: 800; font-family: monospace; color: var(--text); }
+    .p6-result-msg   { font-size: 13px; color: var(--text2); }
+
+    /* Footer */
+    .p6-footer {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border2);
+      max-width: 1100px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+    }
+
+    /* Progress page */
+    .p6-prog-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+    .p6-prog-stat { background: var(--surf); border: 1px solid var(--border2); border-radius: 10px; padding: 14px; text-align: center; }
+    .p6-prog-num  { font-size: 30px; font-weight: 800; color: var(--purple); font-family: monospace; line-height: 1; }
+    .p6-prog-label{ font-size: 11px; color: var(--text3); margin-top: 5px; font-family: monospace; letter-spacing: 0.5px; }
+    .p6-prog-row  { display: grid; grid-template-columns: 1fr 1fr 120px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--border2); }
+    .p6-prog-row:last-child { border-bottom: none; }
+    .p6-prog-row-title { font-size: 12px; color: var(--text2); line-height: 1.4; }
+    .p6-prog-bar-wrap  { background: var(--surf2); height: 7px; border-radius: 3px; overflow: hidden; }
+    .p6-prog-bar       { height: 100%; border-radius: 3px; transition: width 0.5s; min-width: 0; }
+    .p6-prog-bar.good  { background: var(--green); }
+    .p6-prog-bar.ok    { background: var(--yellow); }
+    .p6-prog-bar.bad   { background: var(--red); }
+    .p6-prog-info      { font-size: 11px; color: var(--text3); text-align: right; font-family: monospace; }
+
+    /* Review page */
+    .p6-review-card { background: var(--surf); border: 1px solid var(--border2); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+    .p6-review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .p6-review-title  { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+    .p6-review-start-btn { background: var(--surf2); border: 1px solid var(--border); border-radius: 6px; color: var(--text2); font-size: 12px; padding: 4px 12px; cursor: pointer; font-family: inherit; }
+    .p6-review-start-btn:hover { border-color: var(--purple); color: var(--purple); }
+    .p6-review-q { border-left: 3px solid var(--red); padding: 8px 12px; margin-bottom: 7px; border-radius: 0 6px 6px 0; background: rgba(248,81,73,0.04); }
+    .p6-review-q:last-child { margin-bottom: 0; }
+    .p6-review-q-num { font-size: 10px; color: var(--text3); font-family: monospace; margin-bottom: 3px; }
+    .p6-review-q-ans { font-size: 12px; color: var(--green); font-weight: 600; margin-bottom: 2px; }
+    .p6-review-q-exp { font-size: 11px; color: var(--text3); line-height: 1.65; }
+
+    /* Generate page */
+    .p6-gen-status { margin-top: 10px; font-size: 13px; font-weight: 600; min-height: 20px; }
+    .p6-gen-status.generating { color: var(--accent); }
+    .p6-gen-status.success    { color: var(--green); }
+    .p6-gen-status.error      { color: var(--red); }
+    .p6-gen-item { background: var(--surf2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .p6-gen-item-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+    .p6-gen-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .p6-gen-meta  { font-size: 11px; color: var(--text3); font-family: monospace; }
+    .p6-gen-del-btn { background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); color: var(--red); font-size: 11px; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; }
+    .p6-gen-del-btn:hover { background: rgba(248,81,73,0.18); }
+
+    /* Misc */
+    .p6-empty { text-align: center; padding: 36px 16px; color: var(--text3); font-size: 13px; line-height: 1.9; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="t-nav">
+  <a class="t-nav-home" href="index.html">← HOME</a>
+  <div class="t-nav-brand">Part 6 · 文章完成</div>
+  <span class="t-nav-part-badge">PART 6</span>
+  <div class="t-nav-links">
+    <button class="t-nav-btn active" data-page="select"   onclick="showPage('select')">問題選択</button>
+    <button class="t-nav-btn"        data-page="review"   onclick="showPage('review')">弱点復習</button>
+    <button class="t-nav-btn"        data-page="progress" onclick="showPage('progress')">進捗</button>
+    <button class="t-nav-btn"        data-page="generate" onclick="showPage('generate')">AI生成</button>
+  </div>
+</nav>
+
+<!-- ===== Page: 問題選択 ===== -->
+<div id="page-select" class="p6-page">
+  <div class="p6-select-container">
+    <div class="p6-page-header">
+      <div class="p6-page-title">パッセージを選んで始める</div>
+      <div class="p6-page-desc">全 {{ P6_PASSAGES.length }} パッセージ · Part 6 形式 · 各4問</div>
+    </div>
+    <div class="p6-passage-grid" id="passage-card-grid"></div>
+  </div>
+</div>
+
+<!-- ===== Page: Reading ===== -->
+<div id="page-reading" class="p6-page hidden">
+
+  <!-- Header -->
+  <div class="p6-reading-header">
+    <button class="t-btn t-btn-outline" onclick="showPage('select')" style="padding:6px 14px;font-size:12px">← 戻る</button>
+    <div class="p6-reading-title" id="reading-title"></div>
+    <div class="p6-score-box">
+      <span class="p6-score-label">SCORE</span>
+      <span class="p6-score-value" id="score-display">— / 4</span>
+    </div>
+  </div>
+
+  <!-- Result Banner -->
+  <div id="result-banner" class="p6-result-banner hidden"></div>
+
+  <!-- Intro line -->
+  <div style="padding:8px 20px;max-width:1100px;margin:0 auto">
+    <div id="reading-intro" class="p6-passage-intro"></div>
+  </div>
+
+  <!-- 2-column grid -->
+  <div class="p6-main-grid">
+    <!-- Passage -->
+    <div class="p6-passage-panel">
+      <div class="p6-panel-label">Passage <span class="p6-panel-line"></span></div>
+      <div id="passage-body"></div>
+    </div>
+    <!-- Questions -->
+    <div class="p6-questions-panel">
+      <div class="p6-panel-label">Questions <span class="p6-panel-line"></span></div>
+      <div id="questions-list"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="p6-footer">
+    <button class="t-btn t-btn-outline" onclick="showPage('select')">← 問題選択</button>
+    <button class="t-btn t-btn-outline hidden" id="retry-btn" onclick="retryPassage()">もう一度解く</button>
+    <button class="t-btn t-btn-primary" id="submit-btn" onclick="submitAnswers()" disabled>答え合わせ</button>
+  </div>
+</div>
+
+<!-- ===== Page: 弱点復習 ===== -->
+<div id="page-review" class="p6-page hidden">
+  <div class="p6-select-container">
+    <div class="p6-page-header">
+      <div class="p6-page-title">弱点復習</div>
+      <div class="p6-page-desc">最後に間違えた問題 · 解説を読んで正確さを上げよう</div>
+    </div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<!-- ===== Page: 進捗 ===== -->
+<div id="page-progress" class="p6-page hidden">
+  <div class="p6-select-container">
+    <div class="p6-page-header">
+      <div class="p6-page-title">学習進捗</div>
+      <div class="p6-page-desc">PART 6 PROGRESS</div>
+    </div>
+    <div class="p6-prog-grid" id="prog-overview"></div>
+    <div class="p6-page-header" style="margin-top:8px">
+      <div class="p6-page-title" style="font-size:15px">パッセージ別成績</div>
+    </div>
+    <div id="prog-rows"></div>
+    <div style="margin-top:24px">
+      <button class="t-btn t-btn-danger" onclick="resetProgress()">進捗をリセット</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Page: AI生成 ===== -->
+<div id="page-generate" class="p6-page hidden">
+  <div class="p6-select-container">
+    <div class="p6-page-header">
+      <div class="p6-page-title">AI 問題生成</div>
+      <div class="p6-page-desc">Anthropic API · Part 6 パッセージを自動生成</div>
+    </div>
+
+    <!-- API Key -->
+    <div class="t-gen-card">
+      <label class="t-form-label" for="gen-api-key">Anthropic API キー</label>
+      <input type="password" id="gen-api-key" class="t-form-input" placeholder="sk-ant-..." />
+      <div class="t-form-hint">キーはこのブラウザのローカルストレージにのみ保存されます</div>
+    </div>
+
+    <!-- Options -->
+    <div class="t-gen-card">
+      <div class="t-gen-options">
+        <div>
+          <label class="t-form-label">文書タイプ</label>
+          <select id="gen-type" class="t-form-select">
+            <option value="Business Email">Business Email（メール）</option>
+            <option value="Memo">Memo（社内メモ）</option>
+            <option value="Notice">Notice（お知らせ）</option>
+            <option value="Article">Article（記事）</option>
+            <option value="Business Letter">Business Letter（手紙）</option>
+          </select>
+        </div>
+        <div>
+          <label class="t-form-label">難易度</label>
+          <select id="gen-difficulty" class="t-form-select">
+            <option value="easy">Easy（基礎）</option>
+            <option value="medium" selected>Medium（標準）</option>
+            <option value="hard">Hard（上級）</option>
+          </select>
+        </div>
+      </div>
+      <button id="gen-btn" class="t-btn t-btn-primary t-btn-lg" onclick="generatePassage()">AI でパッセージを生成する</button>
+      <div id="gen-status" class="p6-gen-status"></div>
+    </div>
+
+    <!-- Generated list -->
+    <div class="p6-page-header" style="margin-top:8px">
+      <div class="p6-page-title" style="font-size:15px">生成済みパッセージ</div>
+    </div>
+    <div id="generated-list"></div>
+  </div>
+</div>
+
+<script src="part6-data.js"></script>
+<script src="part6.js"></script>
+</body>
+</html>

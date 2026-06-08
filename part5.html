@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOEIC Part 5 — 文法穴埋め</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="TOEIC Part 5" />
+  <meta name="theme-color" content="#0d1117" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ナビゲーション -->
+    <nav class="nav">
+      <a class="nav-home-btn" href="index.html">← HOME</a>
+      <div class="nav-brand">Part 5 · 文法穴埋め</div>
+      <div class="nav-links">
+        <button class="nav-btn active" data-page="practice" onclick="showPage('practice')">問題演習</button>
+        <button class="nav-btn" data-page="review" onclick="showPage('review')">弱点復習</button>
+        <button class="nav-btn" data-page="progress" onclick="showPage('progress')">進捗</button>
+        <button class="nav-btn" data-page="generate" onclick="showPage('generate')">AI生成</button>
+      </div>
+    </nav>
+
+    <!-- 問題演習ページ -->
+    <div id="page-practice" class="page active">
+      <div class="container">
+        <!-- カテゴリ選択 -->
+        <div id="category-select-area" class="card">
+          <h2 class="section-title">カテゴリを選択</h2>
+          <div id="category-grid" class="category-grid"></div>
+          <div class="mt-20">
+            <button class="btn btn-primary btn-lg" onclick="startPractice('all')">全カテゴリで練習</button>
+          </div>
+        </div>
+
+        <!-- 問題表示エリア -->
+        <div id="question-area" class="hidden">
+          <div class="question-header">
+            <span id="question-counter" class="question-counter"></span>
+            <div class="timer-container">
+              <span id="question-timer" class="timer-display">0:45</span>
+              <span class="timer-label">残り時間</span>
+            </div>
+            <span id="question-category-badge" class="badge"></span>
+          </div>
+          <div class="card">
+            <p id="question-text" class="question-text"></p>
+            <div id="choices" class="choices"></div>
+          </div>
+          <div id="explanation-area" class="hidden">
+            <div id="result-banner" class="result-banner"></div>
+            <div id="time-taken-display" class="time-taken-display"></div>
+            <div class="card explanation-card">
+              <div id="translation-box" class="translation-box"></div>
+              <h3 class="explanation-title">解説</h3>
+              <p id="explanation-text" class="explanation-text"></p>
+              <div id="grammar-point" class="grammar-point"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" onclick="endSession()">終了</button>
+              <button class="btn btn-primary" onclick="nextQuestion()">次の問題 →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- セッション結果 -->
+        <div id="session-result" class="hidden">
+          <div class="card result-card">
+            <h2 class="result-title">セッション結果</h2>
+            <div class="result-score-area">
+              <div class="result-score" id="result-score-display"></div>
+              <div class="result-label">正解率</div>
+            </div>
+            <div id="result-stats" class="result-stats"></div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" onclick="showCategorySelect()">カテゴリ選択へ</button>
+              <button class="btn btn-primary" onclick="startPractice(currentCategory)">もう一度</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 弱点復習ページ -->
+    <div id="page-review" class="page hidden">
+      <div class="container">
+        <div class="card">
+          <h2 class="section-title">弱点復習</h2>
+          <p class="section-desc">間違えた問題・苦手な問題をもう一度解きましょう</p>
+          <div id="review-list"></div>
+          <div id="review-empty" class="empty-msg hidden">
+            間違えた問題がまだありません。問題演習から始めましょう！
+          </div>
+        </div>
+        <div id="review-question-area" class="hidden">
+          <div class="question-header">
+            <span id="review-counter" class="question-counter"></span>
+            <div class="timer-container">
+              <span id="review-timer" class="timer-display">0:45</span>
+              <span class="timer-label">残り時間</span>
+            </div>
+            <span id="review-category-badge" class="badge"></span>
+          </div>
+          <div class="card">
+            <p id="review-question-text" class="question-text"></p>
+            <div id="review-choices" class="choices"></div>
+          </div>
+          <div id="review-explanation-area" class="hidden">
+            <div id="review-result-banner" class="result-banner"></div>
+            <div id="review-time-taken-display" class="time-taken-display"></div>
+            <div class="card explanation-card">
+              <div id="review-translation-box" class="translation-box"></div>
+              <h3 class="explanation-title">解説</h3>
+              <p id="review-explanation-text" class="explanation-text"></p>
+              <div id="review-grammar-point" class="grammar-point"></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" onclick="endReview()">復習リストへ</button>
+              <button class="btn btn-primary" onclick="nextReviewQuestion()">次の問題 →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 進捗ページ -->
+    <div id="page-progress" class="page hidden">
+      <div class="container">
+        <div class="card">
+          <h2 class="section-title">学習進捗</h2>
+          <div class="stats-overview" id="stats-overview"></div>
+        </div>
+        <div class="card">
+          <h3 class="section-title">カテゴリ別成績</h3>
+          <div id="category-stats"></div>
+        </div>
+        <div class="card">
+          <h3 class="section-title">最近の学習履歴</h3>
+          <div id="history-list"></div>
+        </div>
+        <div class="mt-20">
+          <button class="btn btn-danger" onclick="resetProgress()">進捗をリセット</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI生成ページ -->
+    <div id="page-generate" class="page hidden">
+      <div class="container">
+        <div class="card">
+          <h2 class="section-title">AI問題生成</h2>
+          <p class="section-desc">Anthropic APIで新しいTOEIC Part 5問題を自動生成します</p>
+
+          <div class="api-key-area">
+            <label class="form-label">Anthropic APIキー</label>
+            <input type="password" id="api-key-input" class="form-input" placeholder="sk-ant-..." />
+            <p class="form-hint">キーはこのブラウザのローカルストレージにのみ保存されます</p>
+          </div>
+
+          <div class="gen-options">
+            <div class="form-group">
+              <label class="form-label">カテゴリ</label>
+              <select id="gen-category" class="form-select"></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">生成数</label>
+              <select id="gen-count" class="form-select">
+                <option value="1">1問</option>
+                <option value="3" selected>3問</option>
+                <option value="5">5問</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="generate-btn" class="btn btn-primary btn-lg" onclick="generateQuestions()">AIで問題を生成</button>
+          <div id="gen-status" class="gen-status"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="section-title">生成済み問題</h3>
+          <div id="generated-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="questions.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
