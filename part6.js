@@ -280,11 +280,74 @@ function submitAnswers() {
 
   renderPassageBody();
   renderQuestionsPanel();
+  showTranslation(p);
+}
+
+function showTranslation(p) {
+  const area = document.getElementById('translation-area');
+  const body = document.getElementById('translation-body');
+  const btn  = document.getElementById('translate-btn');
+  const status = document.getElementById('translate-status');
+  area.classList.remove('hidden');
+  status.textContent = '';
+
+  if (p.passageTranslation) {
+    body.textContent = p.passageTranslation;
+    body.classList.remove('hidden');
+    btn.classList.add('hidden');
+  } else {
+    body.textContent = '';
+    body.classList.add('hidden');
+    btn.classList.remove('hidden');
+  }
+}
+
+async function generateTranslation() {
+  const p      = P6_PASSAGES[currentPassageIdx];
+  const apiKey = localStorage.getItem(P6_API_KEY);
+  const btn    = document.getElementById('translate-btn');
+  const status = document.getElementById('translate-status');
+  const body   = document.getElementById('translation-body');
+
+  if (!apiKey) { status.textContent = '設定からAPIキーを入力してください'; return; }
+
+  btn.disabled = true;
+  status.textContent = '翻訳中...';
+
+  const passageText = p.passageLines.join('\n');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: `以下のTOEICパッセージを自然な日本語に翻訳してください。翻訳文のみ返してください（説明不要）。\n\n${passageText}` }],
+      }),
+    });
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    const translation = data.content[0].text.trim();
+    p.passageTranslation = translation;
+    body.textContent = translation;
+    body.classList.remove('hidden');
+    btn.classList.add('hidden');
+    status.textContent = '';
+  } catch (e) {
+    status.textContent = `エラー: ${e.message}`;
+    btn.disabled = false;
+  }
 }
 
 function retryPassage() {
   p6Answers   = {};
   p6Submitted = false;
+  document.getElementById('translation-area').classList.add('hidden');
   renderReadingPage();
   startP6Timer();
 }
@@ -445,6 +508,7 @@ Part 6形式:
     "",
     "空行は空文字列で表現"
   ],
+  "passageTranslation": "パッセージ全体の自然な日本語訳",
   "questions": [
     {
       "n": ${nums[0]},
