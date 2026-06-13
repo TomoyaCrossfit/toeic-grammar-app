@@ -250,6 +250,14 @@
     .p6-result-score { font-size: 24px; font-weight: 800; font-family: monospace; color: var(--text); }
     .p6-result-msg   { font-size: 13px; color: var(--text2); }
 
+    /* Timer */
+    .p6-timer-box { display: flex; align-items: center; gap: 6px; background: var(--surf2); border-radius: 6px; padding: 5px 12px; }
+    .p6-timer-label { font-size: 10px; letter-spacing: 1px; color: var(--text3); font-family: monospace; }
+    .p6-timer-value { font-size: 16px; font-weight: 700; font-family: monospace; color: var(--text); min-width: 36px; text-align: right; transition: color 0.3s; }
+    .p6-timer-value.warning { color: var(--yellow); }
+    .p6-timer-value.danger  { color: var(--red); animation: p6-pulse 0.8s ease-in-out infinite; }
+    @keyframes p6-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
     /* Footer */
     .p6-footer {
       display: flex;
@@ -341,6 +349,10 @@
     <div class="p6-score-box">
       <span class="p6-score-label">SCORE</span>
       <span class="p6-score-value" id="score-display">— / 4</span>
+    </div>
+    <div class="p6-timer-box">
+      <span class="p6-timer-label">残り時間</span>
+      <span class="p6-timer-value" id="p6-timer">3:00</span>
     </div>
   </div>
 

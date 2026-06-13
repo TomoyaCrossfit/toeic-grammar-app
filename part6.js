@@ -33,6 +33,7 @@ function showPage(name) {
   document.querySelectorAll('.t-nav-btn[data-page]').forEach(b => b.classList.remove('active'));
   const btn = document.querySelector(`.t-nav-btn[data-page="${name}"]`);
   if (btn) btn.classList.add('active');
+  stopP6Timer();
   if (name === 'select')   renderSelectPage();
   if (name === 'review')   renderReviewPage();
   if (name === 'progress') renderProgressPage();
@@ -71,6 +72,41 @@ function renderSelectPage() {
   }).join('');
 }
 
+// ===== Timer =====
+const P6_TIME_LIMIT = 180; // 3 minutes per passage
+let p6TimerInterval = null;
+let p6TimeElapsed = 0;
+
+function startP6Timer() {
+  stopP6Timer();
+  p6TimeElapsed = 0;
+  updateP6TimerDisplay(P6_TIME_LIMIT);
+  p6TimerInterval = setInterval(() => {
+    p6TimeElapsed++;
+    const remaining = Math.max(0, P6_TIME_LIMIT - p6TimeElapsed);
+    updateP6TimerDisplay(remaining);
+    if (remaining === 0) {
+      stopP6Timer();
+      if (!p6Submitted) submitAnswers();
+    }
+  }, 1000);
+}
+
+function stopP6Timer() {
+  if (p6TimerInterval) { clearInterval(p6TimerInterval); p6TimerInterval = null; }
+}
+
+function updateP6TimerDisplay(remaining) {
+  const el = document.getElementById('p6-timer');
+  if (!el) return;
+  const m = Math.floor(remaining / 60);
+  const s = remaining % 60;
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  el.className = 'p6-timer-value';
+  if (remaining <= 30) el.classList.add('danger');
+  else if (remaining <= 60) el.classList.add('warning');
+}
+
 // ===== Quiz state =====
 let currentPassageIdx = null;
 let p6Answers = {};  // n -> selectedIndex (0-3)
@@ -85,6 +121,7 @@ function startPassage(idx) {
   document.getElementById('page-reading').classList.remove('hidden');
   document.querySelectorAll('.t-nav-btn[data-page]').forEach(b => b.classList.remove('active'));
   window.scrollTo(0, 0);
+  startP6Timer();
 }
 
 // ===== Build passage HTML with blanks =====
@@ -203,6 +240,7 @@ function updateSubmitBtn() {
 function submitAnswers() {
   if (p6Submitted) return;
   p6Submitted = true;
+  stopP6Timer();
 
   const p       = P6_PASSAGES[currentPassageIdx];
   const correct = p.questions.filter(q => p6Answers[q.n] === q.ans).length;
@@ -233,7 +271,10 @@ function submitAnswers() {
   else if (pct >= 50) { msg = `${correct}/${total} 正解。解説を確認しましょう。`; cls = 'ok'; }
   else { msg = `${correct}/${total} 正解。解説をよく読んで復習しましょう。`; cls = 'bad'; }
 
-  banner.innerHTML = `<span class="p6-result-score">${correct}/${total}</span><span class="p6-result-msg">${msg}</span>`;
+  const timeTaken = p6TimeElapsed;
+  const tm = Math.floor(timeTaken / 60), ts = timeTaken % 60;
+  const timeStr = `${tm}:${ts.toString().padStart(2, '0')}`;
+  banner.innerHTML = `<span class="p6-result-score">${correct}/${total}</span><span class="p6-result-msg">${msg}</span><span style="font-size:11px;color:var(--text3);font-family:monospace;margin-left:auto">${timeStr}</span>`;
   banner.className = `p6-result-banner ${cls}`;
   banner.classList.remove('hidden');
 
@@ -245,6 +286,7 @@ function retryPassage() {
   p6Answers   = {};
   p6Submitted = false;
   renderReadingPage();
+  startP6Timer();
 }
 
 // ===== Review page =====
