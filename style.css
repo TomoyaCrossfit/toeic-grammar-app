@@ -115,6 +115,34 @@ a.nav-btn { text-decoration: none; }
 .cat-rate.bad  { background: rgba(248,81,73,0.12);  color: #f85149; border: 1px solid rgba(248,81,73,0.25); }
 .cat-rate.none { background: #1c2128; color: #656d76; border: 1px solid #30363d; }
 
+/* ===== AI Sets ===== */
+.ai-sets-label {
+  font-size: 10px; font-family: monospace; letter-spacing: 2px;
+  color: #656d76; margin: 16px 0 8px; text-transform: uppercase;
+}
+.ai-set-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.ai-set-btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  background: rgba(188,140,255,0.05); border: 1px solid rgba(188,140,255,0.25);
+  border-radius: 10px; padding: 12px 14px; cursor: pointer;
+  transition: all 0.15s; text-align: left; position: relative; width: 100%;
+}
+.ai-set-btn:hover { border-color: #bc8cff; background: rgba(188,140,255,0.1); }
+.ai-set-no   { font-size: 13px; font-weight: 700; color: #bc8cff; font-family: monospace; }
+.ai-set-date { font-size: 11px; color: #656d76; font-family: monospace; }
+.ai-set-count{ font-size: 11px; color: #8b949e; }
+.ai-set-del  {
+  position: absolute; top: 8px; right: 8px; background: none; border: none;
+  color: #656d76; cursor: pointer; font-size: 13px; padding: 2px 5px;
+  border-radius: 4px; opacity: 0; transition: opacity 0.15s;
+}
+.ai-set-btn:hover .ai-set-del { opacity: 1; }
+.ai-set-del:hover { color: #f85149; }
+
 /* ===== Question header ===== */
 .question-header {
   display: flex;

@@ -78,6 +78,15 @@ function saveExtraQuestions(questions) {
   localStorage.setItem('toeic_extra_questions', JSON.stringify(questions));
 }
 
+const AI_SETS_KEY = 'toeic_ai_sets';
+function loadAISets() {
+  try { return JSON.parse(localStorage.getItem(AI_SETS_KEY)) || []; }
+  catch { return []; }
+}
+function saveAISets(sets) {
+  localStorage.setItem(AI_SETS_KEY, JSON.stringify(sets));
+}
+
 function initExtraQuestions() {
   const extras = loadExtraQuestions();
   extras.forEach(q => {
@@ -110,7 +119,8 @@ function showCategorySelect() {
 
 function renderCategories() {
   const grid = document.getElementById('category-grid');
-  grid.innerHTML = CATEGORIES.map(cat => {
+
+  const catHtml = CATEGORIES.map(cat => {
     const stats = progress.categoryStats[cat];
     const rate = stats && stats.answered > 0 ? Math.round(stats.correct / stats.answered * 100) : null;
     const badge = rate !== null ? `<span class="cat-rate ${rate >= 70 ? 'good' : rate >= 50 ? 'ok' : 'bad'}">${rate}%</span>` : '<span class="cat-rate none">未挑戦</span>';
@@ -119,12 +129,33 @@ function renderCategories() {
       ${badge}
     </button>`;
   }).join('');
+
+  const aiSets = loadAISets().filter(s => QUESTIONS.some(q => q._setId === s.id));
+  const aiHtml = aiSets.length ? `
+    <div class="ai-sets-label">AI 生成問題セット</div>
+    <div class="ai-set-grid">${aiSets.map(s => {
+      const count = QUESTIONS.filter(q => q._setId === s.id).length;
+      const d = new Date(s.createdAt);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      return `<button class="ai-set-btn" onclick="startPractice('${s.id}')">
+        <span class="ai-set-no">No.${s.no}</span>
+        <span class="ai-set-date">${dateStr}</span>
+        <span class="ai-set-count">${count}問</span>
+        <button class="ai-set-del" onclick="deleteAISet('${s.id}',event)" title="削除">✕</button>
+      </button>`;
+    }).join('')}</div>` : '';
+
+  grid.innerHTML = catHtml + aiHtml;
 }
 
 // ===== 問題演習 =====
 function startPractice(category) {
   currentCategory = category;
-  const pool = category === 'all' ? QUESTIONS : QUESTIONS.filter(q => q.category === category);
+  const pool = category === 'all'
+    ? QUESTIONS
+    : category.startsWith('aiset_')
+      ? QUESTIONS.filter(q => q._setId === category)
+      : QUESTIONS.filter(q => q.category === category);
   sessionQuestions = shuffle([...pool]);
   sessionIndex = 0;
   sessionCorrect = 0;
@@ -445,6 +476,18 @@ function deleteGeneratedQuestion(id) {
   renderCategories();
 }
 
+function deleteAISet(setId, e) {
+  e.stopPropagation();
+  if (!confirm('このAI生成セットを削除しますか？')) return;
+  const remaining = loadExtraQuestions().filter(q => q._setId !== setId);
+  saveExtraQuestions(remaining);
+  saveAISets(loadAISets().filter(s => s.id !== setId));
+  const idxs = QUESTIONS.reduce((acc, q, i) => q._setId === setId ? [...acc, i] : acc, []);
+  idxs.reverse().forEach(i => QUESTIONS.splice(i, 1));
+  renderGeneratedList();
+  renderCategories();
+}
+
 function deleteAllGeneratedQuestions() {
   if (!confirm('AI生成問題をすべて削除しますか？')) return;
   loadExtraQuestions().forEach(q => {
@@ -541,15 +584,19 @@ JSON配列のみで回答してください（説明文不要）：
 
     const extras = loadExtraQuestions();
     const maxId = Math.max(0, ...QUESTIONS.map(q => q.id), ...extras.map(q => q.id));
-    newQuestions.forEach((q, i) => { q.id = maxId + i + 1; });
+    const setId = 'aiset_' + Date.now();
+    const sets = loadAISets();
+    const setNo = sets.length + 1;
+    newQuestions.forEach((q, i) => { q.id = maxId + i + 1; q._setId = setId; });
 
     saveExtraQuestions([...extras, ...newQuestions]);
+    saveAISets([...sets, { id: setId, no: setNo, createdAt: new Date().toISOString(), count: newQuestions.length }]);
     newQuestions.forEach(q => {
       QUESTIONS.push(q);
       if (!CATEGORIES.includes(q.category)) CATEGORIES.push(q.category);
     });
 
-    status.textContent = `${newQuestions.length}問を追加しました！問題演習ですぐに使えます。`;
+    status.textContent = `${newQuestions.length}問を追加しました！カテゴリ選択に「No.${setNo}」として表示されます。`;
     status.className = 'gen-status success';
     renderGeneratedList();
     renderCategories();
