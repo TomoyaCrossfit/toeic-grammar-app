@@ -462,18 +462,38 @@ async function generateQuestions() {
   localStorage.setItem('toeic_api_key', apiKey);
 
   const rawCategory = document.getElementById('gen-category').value;
-  const category = rawCategory === '_random_'
-    ? CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)]
-    : rawCategory;
+  const isRandom = rawCategory === '_random_';
+  const category = isRandom ? null : rawCategory;
   const count = parseInt(document.getElementById('gen-count').value);
   const btn = document.getElementById('generate-btn');
   const status = document.getElementById('gen-status');
 
   btn.disabled = true;
-  status.textContent = `生成中... ${rawCategory === '_random_' ? `カテゴリ「${category}」` : ''} しばらくお待ちください`;
+  status.textContent = `生成中... しばらくお待ちください`;
   status.className = 'gen-status generating';
 
-  const prompt = `あなたはTOEIC Part 5の問題作成の専門家です。以下の条件で問題を${count}問作成してください。
+  const categoryList = CATEGORIES.join('、');
+  const prompt = isRandom
+    ? `あなたはTOEIC Part 5の問題作成の専門家です。以下の条件で問題を${count}問作成してください。
+
+カテゴリを以下からバランスよく分散させて、各問題に異なるカテゴリを割り当ててください：
+${categoryList}
+
+難易度: TOEIC 750点レベル（ビジネス英語）
+
+JSON配列のみで回答してください（説明文不要）：
+[
+  {
+    "category": "上記カテゴリのいずれか（問題ごとに異なるカテゴリを使うこと）",
+    "text": "英語の問題文（空欄は___ で表す、Part 5形式）",
+    "translation": "問題文の日本語訳（正解の語を入れた完全な文）",
+    "choices": ["選択肢A", "選択肢B", "選択肢C", "選択肢D"],
+    "answer": 正解のインデックス（0〜3の整数）,
+    "explanation": "なぜその答えが正しいかの日本語解説",
+    "grammarPoint": "重要文法ポイント（日本語・短く）"
+  }
+]`
+    : `あなたはTOEIC Part 5の問題作成の専門家です。以下の条件で問題を${count}問作成してください。
 
 カテゴリ: ${category}
 難易度: TOEIC 750点レベル（ビジネス英語）
