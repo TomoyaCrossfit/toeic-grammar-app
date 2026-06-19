@@ -408,7 +408,8 @@ function renderGeneratePage() {
   document.getElementById('api-key-input').value = savedKey;
 
   const catSelect = document.getElementById('gen-category');
-  catSelect.innerHTML = CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+  catSelect.innerHTML = `<option value="_random_">🎲 ランダム（自動選択）</option>` +
+    CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 
   renderGeneratedList();
 }
@@ -460,13 +461,16 @@ async function generateQuestions() {
   if (!apiKey) { alert('APIキーを入力してください'); return; }
   localStorage.setItem('toeic_api_key', apiKey);
 
-  const category = document.getElementById('gen-category').value;
+  const rawCategory = document.getElementById('gen-category').value;
+  const category = rawCategory === '_random_'
+    ? CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)]
+    : rawCategory;
   const count = parseInt(document.getElementById('gen-count').value);
   const btn = document.getElementById('generate-btn');
   const status = document.getElementById('gen-status');
 
   btn.disabled = true;
-  status.textContent = '生成中... しばらくお待ちください';
+  status.textContent = `生成中... ${rawCategory === '_random_' ? `カテゴリ「${category}」` : ''} しばらくお待ちください`;
   status.className = 'gen-status generating';
 
   const prompt = `あなたはTOEIC Part 5の問題作成の専門家です。以下の条件で問題を${count}問作成してください。
@@ -498,7 +502,7 @@ JSON配列のみで回答してください（説明文不要）：
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4096,
+        max_tokens: Math.min(8000, count * 400 + 500),
         messages: [{ role: 'user', content: prompt }]
       })
     });
