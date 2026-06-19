@@ -310,23 +310,15 @@
     .p6-gen-del-btn { background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); color: var(--red); font-size: 11px; padding: 4px 10px; border-radius: 5px; cursor: pointer; font-family: inherit; }
     .p6-gen-del-btn:hover { background: rgba(248,81,73,0.18); }
 
-    /* Translation */
-    .p6-translation-details { margin-top: 4px; }
-    .p6-translation-summary {
-      cursor: pointer; list-style: none; font-size: 12px; font-family: monospace;
-      letter-spacing: 0.5px; color: var(--text3); padding: 7px 12px;
-      background: var(--surf2); border: 1px solid var(--border2); border-radius: 7px;
-      user-select: none; transition: color 0.15s, border-color 0.15s;
-    }
-    .p6-translation-summary:hover { color: var(--accent); border-color: var(--accent); }
-    .p6-translation-summary::-webkit-details-marker { display: none; }
-    .p6-translation-body {
-      margin-top: 8px; padding: 14px 16px;
-      background: var(--surf); border: 1px solid var(--border2); border-radius: 8px;
-      font-size: 13px; line-height: 1.85; color: var(--text2); white-space: pre-wrap;
+    /* Inline translation */
+    .p6-trans-line {
+      font-size: 12px; color: var(--text3); line-height: 1.65;
+      padding: 3px 0 8px 10px;
+      border-left: 2px solid rgba(188,140,255,0.3);
+      margin-bottom: 2px; font-style: italic;
     }
     .p6-translate-btn {
-      margin-top: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+      font-size: 12px; font-weight: 600; cursor: pointer;
       background: var(--surf2); border: 1px solid var(--border); color: var(--accent);
       border-radius: 6px; padding: 6px 14px; font-family: inherit;
     }
@@ -383,14 +375,10 @@
   <!-- Result Banner -->
   <div id="result-banner" class="p6-result-banner hidden"></div>
 
-  <!-- Translation -->
-  <div id="translation-area" class="hidden" style="max-width:1100px;margin:0 auto;padding:0 16px 4px">
-    <details class="p6-translation-details">
-      <summary class="p6-translation-summary">📖 パッセージ日本語訳</summary>
-      <div id="translation-body" class="p6-translation-body"></div>
-      <button id="translate-btn" class="p6-translate-btn hidden" onclick="generateTranslation()">AIで翻訳する</button>
-      <div id="translate-status" class="p6-translate-status"></div>
-    </details>
+  <!-- Translation button (AI-generated passages only) -->
+  <div id="translation-area" class="hidden" style="max-width:1100px;margin:0 auto;padding:4px 20px">
+    <button id="translate-btn" class="p6-translate-btn" onclick="generateTranslation()">📖 AIで日本語訳を表示</button>
+    <span id="translate-status" class="p6-translate-status"></span>
   </div>
 
   <!-- Intro line -->

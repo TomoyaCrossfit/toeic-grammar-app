@@ -126,14 +126,16 @@ function startPassage(idx) {
 
 // ===== Build passage HTML with blanks =====
 function buildPassageHtml(passage, submitted) {
-  const lines = passage.passageLines;
-  const qMap  = {};
+  const lines      = passage.passageLines;
+  const transLines = submitted && passage.passageTranslation
+    ? passage.passageTranslation.split('\n')
+    : null;
+  const qMap = {};
   passage.questions.forEach(q => { qMap[q.n] = q; });
 
-  return lines.map(line => {
+  return lines.map((line, idx) => {
     if (line === '') return '<div class="p6-gap"></div>';
 
-    // Replace [NNN] with interactive blank
     const html = line.replace(/\[(\d+)\]/g, (_, nStr) => {
       const n = parseInt(nStr);
       const q = qMap[n];
@@ -150,7 +152,9 @@ function buildPassageHtml(passage, submitted) {
         : `<span class="p6-blank" onclick="focusQuestion(${n})">(${n})</span>`;
     });
 
-    return `<div class="p6-passage-line">${html}</div>`;
+    const trans = transLines && transLines[idx];
+    const transHtml = trans ? `<div class="p6-trans-line">${esc(trans)}</div>` : '';
+    return `<div class="p6-passage-line">${html}</div>${transHtml}`;
   }).join('');
 }
 
@@ -285,20 +289,13 @@ function submitAnswers() {
 
 function showTranslation(p) {
   const area = document.getElementById('translation-area');
-  const body = document.getElementById('translation-body');
-  const btn  = document.getElementById('translate-btn');
-  const status = document.getElementById('translate-status');
-  area.classList.remove('hidden');
-  status.textContent = '';
-
   if (p.passageTranslation) {
-    body.textContent = p.passageTranslation;
-    body.classList.remove('hidden');
-    btn.classList.add('hidden');
+    area.classList.add('hidden');
+    renderPassageBody();
   } else {
-    body.textContent = '';
-    body.classList.add('hidden');
-    btn.classList.remove('hidden');
+    area.classList.remove('hidden');
+    document.getElementById('translate-btn').disabled = false;
+    document.getElementById('translate-status').textContent = '';
   }
 }
 
@@ -307,7 +304,6 @@ async function generateTranslation() {
   const apiKey = localStorage.getItem(P6_API_KEY);
   const btn    = document.getElementById('translate-btn');
   const status = document.getElementById('translate-status');
-  const body   = document.getElementById('translation-body');
 
   if (!apiKey) { status.textContent = '設定からAPIキーを入力してください'; return; }
 
@@ -327,17 +323,14 @@ async function generateTranslation() {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1500,
-        messages: [{ role: 'user', content: `以下のTOEICパッセージを自然な日本語に翻訳してください。翻訳文のみ返してください（説明不要）。\n\n${passageText}` }],
+        messages: [{ role: 'user', content: `以下のTOEICパッセージを日本語に翻訳してください。\n・元の行数・行順を完全に維持し、1行ずつ対応させてください\n・空行は空行のままにしてください\n・翻訳文のみ返してください（説明不要）\n\n${passageText}` }],
       }),
     });
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
-    const translation = data.content[0].text.trim();
-    p.passageTranslation = translation;
-    body.textContent = translation;
-    body.classList.remove('hidden');
-    btn.classList.add('hidden');
-    status.textContent = '';
+    p.passageTranslation = data.content[0].text.trim();
+    document.getElementById('translation-area').classList.add('hidden');
+    renderPassageBody();
   } catch (e) {
     status.textContent = `エラー: ${e.message}`;
     btn.disabled = false;
