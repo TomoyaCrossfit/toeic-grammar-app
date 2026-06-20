@@ -83,12 +83,7 @@ function startP6Timer() {
   updateP6TimerDisplay(P6_TIME_LIMIT);
   p6TimerInterval = setInterval(() => {
     p6TimeElapsed++;
-    const remaining = Math.max(0, P6_TIME_LIMIT - p6TimeElapsed);
-    updateP6TimerDisplay(remaining);
-    if (remaining === 0) {
-      stopP6Timer();
-      if (!p6Submitted) submitAnswers();
-    }
+    updateP6TimerDisplay(P6_TIME_LIMIT - p6TimeElapsed);
   }, 1000);
 }
 
@@ -99,12 +94,17 @@ function stopP6Timer() {
 function updateP6TimerDisplay(remaining) {
   const el = document.getElementById('p6-timer');
   if (!el) return;
-  const m = Math.floor(remaining / 60);
-  const s = remaining % 60;
-  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
   el.className = 'p6-timer-value';
-  if (remaining <= 30) el.classList.add('danger');
-  else if (remaining <= 60) el.classList.add('warning');
+  if (remaining > 0) {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    if (remaining <= 30) el.classList.add('danger');
+    else if (remaining <= 60) el.classList.add('warning');
+  } else {
+    el.textContent = `+${-remaining}s`;
+    el.classList.add('danger');
+  }
 }
 
 // ===== Quiz state =====
@@ -143,8 +143,11 @@ function buildPassageHtml(passage, submitted) {
       const sel = p6Answers[n];
       if (submitted && sel !== undefined) {
         const correct = sel === q.ans;
-        const txt = q.opts[sel];
-        return `<span class="p6-blank-filled ${correct ? 'correct' : 'wrong'}" title="${esc(q.opts[q.ans])}">${esc(txt)}</span>`;
+        if (correct) {
+          return `<span class="p6-blank-filled correct">${esc(q.opts[sel])}</span>`;
+        } else {
+          return `<span class="p6-blank-filled wrong">${esc(q.opts[sel])}</span><span class="p6-blank-arrow">→</span><span class="p6-blank-filled correct">${esc(q.opts[q.ans])}</span>`;
+        }
       }
       const filled = sel !== undefined ? q.opts[sel] : null;
       return filled
@@ -204,9 +207,14 @@ function renderQuestionsPanel() {
       } else if (i === sel) {
         cls += ' selected';
       }
+      const label = submitted
+        ? (i === q.ans ? ' ○' : (i === sel && sel !== q.ans ? ' ✗' : ''))
+        : '';
+      const optTrans = submitted && q.optTranslations?.[i]
+        ? `<span class="p6-opt-trans">${esc(q.optTranslations[i])}</span>` : '';
       return `<button class="${cls}" onclick="selectP6Answer(${q.n}, ${i})" ${submitted ? 'disabled' : ''}>
-        <span class="p6-choice-key">${String.fromCharCode(65 + i)}</span>
-        <span>${esc(opt)}</span>
+        <span class="p6-choice-key">${String.fromCharCode(65 + i)}${label}</span>
+        <span class="p6-opt-wrap"><span>${esc(opt)}</span>${optTrans}</span>
       </button>`;
     }).join('');
 
@@ -494,6 +502,7 @@ Part 6形式:
 - 文の途中（"I believe it is [${nums[2]}] for the success" のように文の一部として）絶対に使用しないこと
 - 文挿入の空欄の前後は必ず完全な文（ピリオドで終わる文）であること
 - 他の3つの空欄（語彙・文法）は文の中の単語1つを置き換える形式にすること
+- 空欄の直前・直後にある語を選択肢に含めないこと（例：本文に"has"があるなら選択肢は"approved"のみにし"has approved"としない）
 
 以下のJSON形式のみで返答してください（説明不要）：
 {
@@ -512,6 +521,7 @@ Part 6形式:
     {
       "n": ${nums[0]},
       "opts": ["選択肢A", "選択肢B", "選択肢C", "選択肢D"],
+      "optTranslations": ["A訳", "B訳", "C訳", "D訳"],
       "ans": 正解インデックス（0〜3）,
       "exp": "日本語解説（なぜ正解か・文法ポイントを含む）",
       "grammarPoint": "文法ポイント（日本語・短く）",
@@ -520,6 +530,7 @@ Part 6形式:
     {
       "n": ${nums[1]},
       "opts": ["選択肢A", "選択肢B", "選択肢C", "選択肢D"],
+      "optTranslations": ["A訳", "B訳", "C訳", "D訳"],
       "ans": 正解インデックス,
       "exp": "日本語解説",
       "grammarPoint": "文法ポイント",
@@ -528,6 +539,7 @@ Part 6形式:
     {
       "n": ${nums[2]},
       "opts": ["完全な英文A", "完全な英文B", "完全な英文C", "完全な英文D"],
+      "optTranslations": ["A文の訳", "B文の訳", "C文の訳", "D文の訳"],
       "ans": 正解インデックス,
       "exp": "日本語解説（前後文脈の理由）",
       "grammarPoint": "文挿入問題: 前後の文脈の流れを読む",
@@ -536,6 +548,7 @@ Part 6形式:
     {
       "n": ${nums[3]},
       "opts": ["選択肢A", "選択肢B", "選択肢C", "選択肢D"],
+      "optTranslations": ["A訳", "B訳", "C訳", "D訳"],
       "ans": 正解インデックス,
       "exp": "日本語解説",
       "grammarPoint": "文法ポイント",
