@@ -155,8 +155,25 @@ function buildPassageHtml(passage, submitted) {
         : `<span class="p6-blank" onclick="focusQuestion(${n})">(${n})</span>`;
     });
 
-    const trans = transLines && transLines[idx];
-    const transHtml = trans ? `<div class="p6-trans-line">${esc(trans)}</div>` : '';
+    // Find which question (if any) has a blank on this line
+    const blankNums = [...line.matchAll(/\[(\d+)\]/g)].map(m => parseInt(m[1]));
+    const firstQ    = blankNums.length > 0 ? qMap[blankNums[0]] : null;
+
+    let trans      = transLines?.[idx] || null;
+    let transClass = 'p6-trans-line';
+
+    if (submitted && firstQ) {
+      if (firstQ.isSentence) {
+        // 文挿入: 正解選択肢の日本語訳を使う（passageTranslation は [NNN] のまま翻訳されるため）
+        const correctTrans = firstQ.optTranslations?.[firstQ.ans];
+        if (correctTrans) { trans = correctTrans; transClass = 'p6-trans-line p6-trans-sentence'; }
+      } else {
+        // 単語挿入: 黄色ハイライト
+        transClass = 'p6-trans-line p6-trans-line-blank';
+      }
+    }
+
+    const transHtml = trans ? `<div class="${transClass}">${esc(trans)}</div>` : '';
     return `<div class="p6-passage-line">${html}</div>${transHtml}`;
   }).join('');
 }
